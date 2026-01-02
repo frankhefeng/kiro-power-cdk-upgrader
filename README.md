@@ -196,7 +196,7 @@ We welcome contributions to the CDK Upgrader! Here's how you can help:
 
 1. **Fork the repository**
    ```bash
-   git clone https://github.com/frankhefeng/kiro-power-cdk-upgrader.git
+   git clone https://github.com/<your_name>/kiro-power-cdk-upgrader.git
    cd kiro-power-cdk-upgrader
    ```
 
@@ -210,12 +210,7 @@ We welcome contributions to the CDK Upgrader! Here's how you can help:
    - Update relevant steering files
    - Test with real CDK projects
 
-4. **Commit with semantic messages**
-   ```bash
-   git commit -m "feat: add support for new construct migration"
-   ```
-
-5. **Submit a pull request**
+4. **Submit a pull request**
    - Describe what your changes do
    - Reference any related issues
 
