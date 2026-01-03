@@ -1471,6 +1471,20 @@ Extract:
 - Target ES version
 - Module settings
 
+#### Step 5: Read Template jest.config.js
+
+```bash
+cat "$TEMP_DIR/jest.config.js"
+```
+
+Extract:
+- Jest test environment settings
+- Test file patterns
+- Transform configuration
+- Setup files (e.g., aws-cdk-lib/testhelpers/jest-autoclean)
+
+**CRITICAL**: This file MUST be read and used for complete replacement of the project's jest.config.js. Do NOT skip this step.
+
 ### Template Information Output
 
 ```
@@ -1605,7 +1619,8 @@ echo "Action: Validating template structure and processing project files"
 cd "$TEMP_DIR"
 
 # Verify expected template files exist
-REQUIRED_FILES=("cdk.json" "package.json" "tsconfig.json" ".gitignore")
+# CRITICAL: jest.config.js MUST be included - do NOT skip it
+REQUIRED_FILES=("cdk.json" "package.json" "tsconfig.json" "jest.config.js" ".gitignore")
 for file in "${REQUIRED_FILES[@]}"; do
   if [ ! -f "$file" ]; then
     echo "✗ Template validation failed: Missing $file"
@@ -1613,10 +1628,19 @@ for file in "${REQUIRED_FILES[@]}"; do
   fi
 done
 
-echo "✓ Template structure validated"
+echo "✓ Template structure validated (including jest.config.js)"
 ```
 
 ### Step 2: File Processing Execution
+
+**CRITICAL**: ALL files listed below MUST be processed. Do NOT skip any file.
+
+**Files to read from BOTH project and template directories**:
+1. `package.json` - from project AND template
+2. `cdk.json` - from project AND template
+3. `tsconfig.json` - from project AND template
+4. `jest.config.js` - from project AND template (MUST NOT SKIP)
+5. `.gitignore` - from project AND template
 
 Process files in the specific order defined in `file-processing.md`:
 
@@ -1625,10 +1649,10 @@ cd "<project_path>"
 
 echo "=== File Processing: <project_name> ==="
 
-# Process files in required order
+# Process files in required order - DO NOT SKIP ANY FILE
 process_source_map_cleanup
 process_file "tsconfig.json" "REPLACE"
-process_file "jest.config.js" "REPLACE"
+process_file "jest.config.js" "REPLACE"    # CRITICAL: Do NOT skip this
 process_file "package.json" "SELECTIVE_MERGE"
 process_file "cdk.json" "TARGETED_REPLACE"
 process_file ".gitignore" "ADDITIVE_MERGE"

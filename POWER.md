@@ -262,7 +262,8 @@ These may trigger simplified upgrade logic instead of the Power's comprehensive 
 ✅ Step 7: File Processing
    - Intelligent file merging based on file-processing.md
    - source-map-support cleanup
-   - tsconfig.json/jest.config.js replacement
+   - tsconfig.json COMPLETE replacement (no merge)
+   - jest.config.js COMPLETE replacement (no merge) - DO NOT SKIP
    - package.json selective merge
    - cdk.json targeted replacement (app preserved)
    - .gitignore additive merge
@@ -294,6 +295,7 @@ These may trigger simplified upgrade logic instead of the Power's comprehensive 
 - ❌ No temp directory creation
 - ❌ No mention of steering files
 - ❌ **Skipping deprecated construct updates**
+- ❌ **Skipping jest.config.js replacement** (must be completely replaced with template version)
 
 ## Steering Files Map
 
