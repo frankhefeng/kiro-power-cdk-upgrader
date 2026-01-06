@@ -14,7 +14,7 @@ The CDK Upgrader is a Kiro Power that can be installed directly into your Kiro w
 2. Click "Add Custom Power" or use the command palette (`Cmd+Shift+P` / `Ctrl+Shift+P`)
 3. Select "Import Power from GitHub"
 4. Enter the repository URL: `https://github.com/frankhefeng/kiro-power-cdk-upgrader`
-5. Click "Install"
+5. Hit Enter
 
 
 #### Option 2: Clone and Install from Local Path
