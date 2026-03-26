@@ -245,7 +245,7 @@ After cleanup, verify no references remain:
 echo "=== Source-Map-Support Cleanup Verification ==="
 
 # Check source files
-SOURCE_REFS=$(find . -name "*.ts" -o -name "*.js" | grep -v node_modules | grep -v cdk.out | xargs grep -l "source-map-support" 2>/dev/null || true)
+SOURCE_REFS=$(find . -name "*.ts" -o -name "*.js" | grep -v node_modules | grep -v cdk.out | xargs grep -l "source-map-support" || true)
 
 if [ -n "$SOURCE_REFS" ]; then
   echo "✗ Source-map-support references still found in:"
@@ -256,7 +256,7 @@ else
 fi
 
 # Check package.json (will be cleaned during package.json processing)
-if grep -q "source-map-support" package.json 2>/dev/null; then
+if grep -q "source-map-support" package.json; then
   echo "ℹ source-map-support found in package.json (will be removed during dependency update)"
 else
   echo "✓ No source-map-support found in package.json"

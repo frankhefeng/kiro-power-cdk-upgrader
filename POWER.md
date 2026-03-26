@@ -105,7 +105,7 @@ npm install -g aws-cdk
 **Required Dependencies:**
 ```bash
 # Validate required tools are available
-command -v jq >/dev/null 2>&1 || { echo "ERROR: jq is required but not installed" >&2; exit 1; }
+command -v jq || { echo "ERROR: jq is required but not installed" >&2; exit 1; }
 ```
 
 **Install jq if missing:**
@@ -375,6 +375,12 @@ This Power is implemented entirely through standard Kiro agent capabilities:
 - npm registry queries
 - Git operations
 - No external MCP servers required
+
+### CLI Command Safety Rules
+
+- **NEVER** use `2>/dev/null` in any CLI command generated or executed by the agent. Suppressing stderr causes commands to hang or get stuck in the Kiro execution environment. Always allow stderr output to flow naturally so errors are visible and commands complete properly.
+- This applies to ALL commands: `date`, `grep`, `npm`, `find`, `git`, `command -v`, and any other CLI tool.
+- If a steering file example shows `2>/dev/null`, strip it when generating the actual command to execute. Use `|| true` or `|| echo ""` for error suppression instead where needed.
 
 ### Mandatory Workflow Compliance
 

@@ -67,7 +67,7 @@ Scan the current directory and all subdirectories to find CDK projects:
 
 2. **Directory traversal command**:
    ```bash
-   find . -name "cdk.json" -type f 2>/dev/null
+   find . -name "cdk.json" -type f
    ```
 
 3. **For each found `cdk.json`**, record the parent directory as a potential CDK project location
@@ -150,7 +150,7 @@ Before proceeding with any project, validate git tracking:
 
 ```bash
 cd "<project_path>"
-git rev-parse --git-dir 2>/dev/null
+git rev-parse --git-dir
 ```
 
 If this command fails, the project is not in a git repository.
@@ -161,7 +161,7 @@ If this command fails, the project is not in a git repository.
 #### Step 2: Verify Git is Functional
 
 ```bash
-git status --porcelain 2>/dev/null
+git status --porcelain
 ```
 
 If this fails, git may not be properly configured.
@@ -474,20 +474,20 @@ calculate_days_since() {
         local release_timestamp
         
         # Try ISO format with milliseconds (2025-12-17T14:36:35.919Z)
-        release_timestamp=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${release_date%.*}" +%s 2>/dev/null)
+        release_timestamp=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${release_date%.*}" +%s)
         
         # Try date only format (2025-12-17)
         if [ -z "$release_timestamp" ] || [ "$release_timestamp" = "0" ]; then
-            release_timestamp=$(date -j -f "%Y-%m-%d" "${release_date%%T*}" +%s 2>/dev/null)
+            release_timestamp=$(date -j -f "%Y-%m-%d" "${release_date%%T*}" +%s)
         fi
         
         # Fallback: try without format specifier
         if [ -z "$release_timestamp" ] || [ "$release_timestamp" = "0" ]; then
-            release_timestamp=$(date -j -f "%Y-%m-%d" "${release_date}" +%s 2>/dev/null || echo "0")
+            release_timestamp=$(date -j -f "%Y-%m-%d" "${release_date}" +%s || echo "0")
         fi
     else
         # Linux - GNU date handles most formats automatically
-        local release_timestamp=$(date -d "$release_date" +%s 2>/dev/null || echo "0")
+        local release_timestamp=$(date -d "$release_date" +%s || echo "0")
     fi
     
     # Validate timestamp
@@ -509,14 +509,14 @@ compare_timestamps() {
     
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
-        local ts1=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${date1%.*}" +%s 2>/dev/null || \
-                    date -j -f "%Y-%m-%d" "${date1%%T*}" +%s 2>/dev/null || echo "0")
-        local ts2=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${date2%.*}" +%s 2>/dev/null || \
-                    date -j -f "%Y-%m-%d" "${date2%%T*}" +%s 2>/dev/null || echo "0")
+        local ts1=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${date1%.*}" +%s || \
+                    date -j -f "%Y-%m-%d" "${date1%%T*}" +%s || echo "0")
+        local ts2=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${date2%.*}" +%s || \
+                    date -j -f "%Y-%m-%d" "${date2%%T*}" +%s || echo "0")
     else
         # Linux
-        local ts1=$(date -d "$date1" +%s 2>/dev/null || echo "0")
-        local ts2=$(date -d "$date2" +%s 2>/dev/null || echo "0")
+        local ts1=$(date -d "$date1" +%s || echo "0")
+        local ts2=$(date -d "$date2" +%s || echo "0")
     fi
     
     if [ "$ts1" = "0" ] || [ "$ts2" = "0" ]; then
@@ -657,8 +657,8 @@ echo "Following: version-strategy.md Step 4 (CLI release date >= Lib release dat
 echo ""
 
 # Get release dates for both versions
-CLI_RELEASE_DATE=$(npm view aws-cdk time --json | jq -r ".[\"$TARGET_CDK_CLI_VERSION\"]" 2>/dev/null)
-LIB_RELEASE_DATE=$(npm view aws-cdk-lib time --json | jq -r ".[\"$TARGET_CDK_LIB_VERSION\"]" 2>/dev/null)
+CLI_RELEASE_DATE=$(npm view aws-cdk time --json | jq -r ".[\"$TARGET_CDK_CLI_VERSION\"]")
+LIB_RELEASE_DATE=$(npm view aws-cdk-lib time --json | jq -r ".[\"$TARGET_CDK_LIB_VERSION\"]")
 
 # Validate we have both dates
 if [ -z "$CLI_RELEASE_DATE" ] || [ "$CLI_RELEASE_DATE" = "null" ]; then
@@ -707,7 +707,7 @@ if ! compare_timestamps "$LIB_RELEASE_DATE" "$CLI_RELEASE_DATE"; then
         fi
         
         # Get release date for candidate
-        CANDIDATE_RELEASE_DATE=$(echo "$ALL_LIB_TIMES" | jq -r ".[\"$CANDIDATE_VERSION\"]" 2>/dev/null)
+        CANDIDATE_RELEASE_DATE=$(echo "$ALL_LIB_TIMES" | jq -r ".[\"$CANDIDATE_VERSION\"]")
         
         if [ -z "$CANDIDATE_RELEASE_DATE" ] || [ "$CANDIDATE_RELEASE_DATE" = "null" ]; then
             echo "  Unable to get release date for $CANDIDATE_VERSION"
@@ -793,8 +793,8 @@ echo "=== Step 5: Final Validation ==="
 echo ""
 
 # Final validation checklist
-CLI_RELEASE_DATE=$(npm view aws-cdk time --json | jq -r ".[\"$TARGET_CDK_CLI_VERSION\"]" 2>/dev/null)
-LIB_RELEASE_DATE=$(npm view aws-cdk-lib time --json | jq -r ".[\"$TARGET_CDK_LIB_VERSION\"]" 2>/dev/null)
+CLI_RELEASE_DATE=$(npm view aws-cdk time --json | jq -r ".[\"$TARGET_CDK_CLI_VERSION\"]")
+LIB_RELEASE_DATE=$(npm view aws-cdk-lib time --json | jq -r ".[\"$TARGET_CDK_LIB_VERSION\"]")
 
 # Check 1: CLI version stability (> 7 days old)
 CLI_DAYS=$(calculate_days_since "$CLI_RELEASE_DATE")
@@ -1031,17 +1031,17 @@ When environment checks fail, generate appropriate upgrade commands based on the
 
 **Check for nvm (Node Version Manager)**:
 ```bash
-command -v nvm 2>/dev/null || [ -d "$HOME/.nvm" ]
+command -v nvm || [ -d "$HOME/.nvm" ]
 ```
 
 **Check for Homebrew (macOS)**:
 ```bash
-command -v brew 2>/dev/null
+command -v brew
 ```
 
 **Check for apt (Debian/Ubuntu)**:
 ```bash
-command -v apt-get 2>/dev/null
+command -v apt-get
 ```
 
 #### Node.js Upgrade Commands
@@ -1670,7 +1670,7 @@ process_source_map_cleanup() {
   local files_cleaned=0
   
   find . -name "*.ts" -o -name "*.js" | grep -v node_modules | grep -v cdk.out | while read file; do
-    if grep -q "source-map-support" "$file" 2>/dev/null; then
+    if grep -q "source-map-support" "$file"; then
       # Remove import statements
       sed -i "/import.*source-map-support/d" "$file"
       
@@ -2076,7 +2076,7 @@ DEPRECATED_PATTERNS=(
 # Scan each file
 for file in $(find . -name "*.ts" -type f -not -path "./node_modules/*" -not -path "./cdk.out/*"); do
   for pattern in "${DEPRECATED_PATTERNS[@]}"; do
-    if grep -qE "$pattern" "$file" 2>/dev/null; then
+    if grep -qE "$pattern" "$file"; then
       echo "Found deprecated pattern in: $file"
       grep -nE "$pattern" "$file"
     fi
@@ -3025,7 +3025,7 @@ fix_lint_errors() {
   
   # Try eslint auto-fix first
   if command -v eslint >/dev/null 2>&1; then
-    npx eslint . --fix --ext .ts,.js 2>/dev/null || true
+    npx eslint . --fix --ext .ts,.js || true
     echo "✓ Applied eslint auto-fixes"
   fi
   

@@ -203,7 +203,7 @@ PATTERNS=(
 
 for file in $TS_FILES; do
   for pattern in "${PATTERNS[@]}"; do
-    grep -n -E "$pattern" "$file" 2>/dev/null
+    grep -n -E "$pattern" "$file"
   done
 done
 ```

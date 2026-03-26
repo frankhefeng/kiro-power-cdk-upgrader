@@ -265,12 +265,12 @@ calculate_days_since() {
     # Handle different date formats and OS compatibility
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
-        local release_timestamp=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${release_date%.*}" +%s 2>/dev/null || \
-                                 date -j -f "%Y-%m-%d" "${release_date%%T*}" +%s 2>/dev/null || \
+        local release_timestamp=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${release_date%.*}" +%s || \
+                                 date -j -f "%Y-%m-%d" "${release_date%%T*}" +%s || \
                                  echo "0")
     else
         # Linux
-        local release_timestamp=$(date -d "$release_date" +%s 2>/dev/null || echo "0")
+        local release_timestamp=$(date -d "$release_date" +%s || echo "0")
     fi
     
     if [ "$release_timestamp" -eq 0 ]; then
@@ -297,7 +297,7 @@ ALL_CLI_VERSIONS=$(npm view aws-cdk versions --json)
 LATEST_CLI_VERSION=$(npm view aws-cdk version)
 
 # Get release date with error handling
-LATEST_CLI_DATE=$(npm view aws-cdk time --json | jq -r ".[\"$LATEST_CLI_VERSION\"]" 2>/dev/null)
+LATEST_CLI_DATE=$(npm view aws-cdk time --json | jq -r ".[\"$LATEST_CLI_VERSION\"]")
 if [ -z "$LATEST_CLI_DATE" ] || [ "$LATEST_CLI_DATE" = "null" ]; then
     echo "ERROR: Unable to get release date for $LATEST_CLI_VERSION" >&2
     exit 1
@@ -330,7 +330,7 @@ else
     TARGET_CDK_CLI_VERSION="$PREVIOUS_STABLE"
 fi
 
-CLI_RELEASE_DATE=$(npm view aws-cdk time --json | jq -r ".[\"$TARGET_CDK_CLI_VERSION\"]" 2>/dev/null)
+CLI_RELEASE_DATE=$(npm view aws-cdk time --json | jq -r ".[\"$TARGET_CDK_CLI_VERSION\"]")
 echo "Selected TARGET_CDK_CLI_VERSION: $TARGET_CDK_CLI_VERSION"
 echo "CLI_RELEASE_DATE: $CLI_RELEASE_DATE"
 ```
@@ -357,12 +357,12 @@ calculate_days_since() {
     
     if [[ "$OSTYPE" == "darwin"* ]]; then
         # macOS
-        local release_timestamp=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${release_date%.*}" +%s 2>/dev/null || \
-                                 date -j -f "%Y-%m-%d" "${release_date%%T*}" +%s 2>/dev/null || \
+        local release_timestamp=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${release_date%.*}" +%s || \
+                                 date -j -f "%Y-%m-%d" "${release_date%%T*}" +%s || \
                                  echo "0")
     else
         # Linux
-        local release_timestamp=$(date -d "$release_date" +%s 2>/dev/null || echo "0")
+        local release_timestamp=$(date -d "$release_date" +%s || echo "0")
     fi
     
     if [ "$release_timestamp" -eq 0 ]; then
@@ -394,7 +394,7 @@ echo "All Lib versions: $(echo "$ALL_LIB_VERSIONS" | jq -r '.[-10:]' | tr '\n' '
 echo "Latest version: $LATEST_LIB_VERSION"
 
 # Get release date with error handling
-LATEST_LIB_DATE=$(npm view aws-cdk-lib time --json | jq -r ".[\"$LATEST_LIB_VERSION\"]" 2>/dev/null)
+LATEST_LIB_DATE=$(npm view aws-cdk-lib time --json | jq -r ".[\"$LATEST_LIB_VERSION\"]")
 if [ -z "$LATEST_LIB_DATE" ] || [ "$LATEST_LIB_DATE" = "null" ]; then
     echo "ERROR: Unable to get release date for $LATEST_LIB_VERSION" >&2
     exit 1
@@ -419,9 +419,9 @@ else
 fi
 
 # Final compatibility check with CLI_RELEASE_DATE
-CANDIDATE_LIB_DATE=$(npm view aws-cdk-lib time --json | jq -r ".[\"$CANDIDATE_LIB_VERSION\"]" 2>/dev/null)
-CLI_TIMESTAMP=$(date -d "$CLI_RELEASE_DATE" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%S" "${CLI_RELEASE_DATE%.*}" +%s)
-LIB_TIMESTAMP=$(date -d "$CANDIDATE_LIB_DATE" +%s 2>/dev/null || date -j -f "%Y-%m-%dT%H:%M:%S" "${CANDIDATE_LIB_DATE%.*}" +%s)
+CANDIDATE_LIB_DATE=$(npm view aws-cdk-lib time --json | jq -r ".[\"$CANDIDATE_LIB_VERSION\"]")
+CLI_TIMESTAMP=$(date -d "$CLI_RELEASE_DATE" +%s || date -j -f "%Y-%m-%dT%H:%M:%S" "${CLI_RELEASE_DATE%.*}" +%s)
+LIB_TIMESTAMP=$(date -d "$CANDIDATE_LIB_DATE" +%s || date -j -f "%Y-%m-%dT%H:%M:%S" "${CANDIDATE_LIB_DATE%.*}" +%s)
 
 if [ "$LIB_TIMESTAMP" -le "$CLI_TIMESTAMP" ]; then
     echo "✓ Compatibility check passed"
@@ -477,8 +477,8 @@ TARGET_CDK_LIB_VERSION: 2.232.2
 # Strategy: Check highest patch of each minor series, version number descending
 find_compatible_lib_version() {
     local cli_release_date="$1"
-    local cli_timestamp=$(date -d "$cli_release_date" +%s 2>/dev/null || \
-        date -j -f "%Y-%m-%dT%H:%M:%S" "${cli_release_date%.*}" +%s 2>/dev/null)
+    local cli_timestamp=$(date -d "$cli_release_date" +%s || \
+        date -j -f "%Y-%m-%dT%H:%M:%S" "${cli_release_date%.*}" +%s)
     
     # Get all versions
     local all_versions=$(npm view aws-cdk-lib versions --json)
@@ -496,9 +496,9 @@ find_compatible_lib_version() {
         [ -z "$highest_patch" ] && continue
         
         # Get release date for highest patch
-        local patch_date=$(npm view aws-cdk-lib time."$highest_patch" 2>/dev/null)
-        local patch_timestamp=$(date -d "$patch_date" +%s 2>/dev/null || \
-            date -j -f "%Y-%m-%dT%H:%M:%S" "${patch_date%.*}" +%s 2>/dev/null)
+        local patch_date=$(npm view aws-cdk-lib time."$highest_patch")
+        local patch_timestamp=$(date -d "$patch_date" +%s || \
+            date -j -f "%Y-%m-%dT%H:%M:%S" "${patch_date%.*}" +%s)
         
         # Check compatibility: patch release date <= CLI release date
         if [ "$patch_timestamp" -le "$cli_timestamp" ]; then
@@ -904,20 +904,20 @@ calculate_days_since() {
         local release_timestamp
         
         # Try ISO format with milliseconds (2025-12-17T14:36:35.919Z)
-        release_timestamp=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${release_date%.*}" +%s 2>/dev/null)
+        release_timestamp=$(date -j -f "%Y-%m-%dT%H:%M:%S" "${release_date%.*}" +%s)
         
         # Try date only format (2025-12-17)
         if [ -z "$release_timestamp" ] || [ "$release_timestamp" = "0" ]; then
-            release_timestamp=$(date -j -f "%Y-%m-%d" "${release_date%%T*}" +%s 2>/dev/null)
+            release_timestamp=$(date -j -f "%Y-%m-%d" "${release_date%%T*}" +%s)
         fi
         
         # Fallback: try without format specifier
         if [ -z "$release_timestamp" ] || [ "$release_timestamp" = "0" ]; then
-            release_timestamp=$(date -j -f "%Y-%m-%d" "${release_date}" +%s 2>/dev/null || echo "0")
+            release_timestamp=$(date -j -f "%Y-%m-%d" "${release_date}" +%s || echo "0")
         fi
     else
         # Linux - GNU date handles most formats automatically
-        local release_timestamp=$(date -d "$release_date" +%s 2>/dev/null || echo "0")
+        local release_timestamp=$(date -d "$release_date" +%s || echo "0")
     fi
     
     # Validate timestamp
@@ -946,7 +946,7 @@ check_version_age() {
     echo "Checking age of $package_name version $version..."
     
     # Get release date from npm
-    local release_date=$(npm view "$package_name" time."$version" 2>/dev/null)
+    local release_date=$(npm view "$package_name" time."$version")
     if [ -z "$release_date" ]; then
         echo "ERROR: Unable to get release date for $package_name@$version" >&2
         return 1
@@ -1049,7 +1049,7 @@ check_version_with_fallback() {
     
     # Get release date
     local release_date
-    release_date=$(npm view "$package_name" time."$version" 2>/dev/null)
+    release_date=$(npm view "$package_name" time."$version")
     if [ -z "$release_date" ]; then
         echo "ERROR: Unable to get release date for $package_name@$version" >&2
         echo "Using fallback version: $fallback_version" >&2
@@ -1135,7 +1135,7 @@ get_known_stable_version() {
 }
 
 # Example usage when npm registry has issues
-if ! LATEST_CLI_VERSION=$(npm view aws-cdk version 2>/dev/null); then
+if ! LATEST_CLI_VERSION=$(npm view aws-cdk version); then
     echo "WARNING: npm registry query failed, using known stable version" >&2
     TARGET_CDK_CLI_VERSION=$(get_known_stable_version "cli")
     echo "Using known stable CLI version: $TARGET_CDK_CLI_VERSION" >&2
